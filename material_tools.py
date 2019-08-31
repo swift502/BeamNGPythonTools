@@ -139,8 +139,8 @@ def optimiseTexturesLegacy(path):
     clipboard.copy(output)
 
     print('Original size: {}'.format(len(materials)))
-    print('Duplicate materials: {}'.format(len(optimisedMaterials)))
-    print('Reduced by {}%'.format(str(round((len(optimisedMaterials) / len(materials)) * 100, 2))))
+    print('Removed materials: {}'.format(len(materials) - len(optimisedMaterials)))
+    print('Reduced by {}%'.format(str(round((1-(len(optimisedMaterials) / len(materials))) * 100, 2))))
 
 
 # jsonToLegacy("C:\\Users\\blaha\\Desktop\\mats.json")
