@@ -42,15 +42,19 @@ def getLegacyFormat(material):
     legacy = ''
     legacy += 'singleton material({}){}'.format(material['name'], newLine)
     legacy += '{' + newLine
-    legacy += tab + 'mapTo = "{}";{}'.format(material['mapTo'], newLine)
-    if('colorMap' in material):
-            legacy += tab + 'colorMap[0] = "{}";{}'.format(material['colorMap'], newLine)
-    if('color' in material):
-        legacy += tab + 'diffuseColor[0] = "{} {} {} {}";{}'.format(str(material['color'][0]), str(material['color'][1]), str(material['color'][2]), str(material['color'][3]), newLine)
-    legacy += tab + 'specularPower[0] = "1";' + newLine
-    legacy += tab + 'translucentBlendOp = "None";' + newLine
-    legacy += tab + 'vertColor[0] = "1";' + newLine
-    legacy += tab + 'useAnisotropic[0] = "1";' + newLine
+    # legacy += tab + 'mapTo = "{}";{}'.format(material['mapTo'], newLine)
+    # if('colorMap' in material):
+    #         legacy += tab + 'colorMap[0] = "{}";{}'.format(material['colorMap'], newLine)
+    # if('color' in material):
+    #     legacy += tab + 'diffuseColor[0] = "{} {} {} {}";{}'.format(str(material['color'][0]), str(material['color'][1]), str(material['color'][2]), str(material['color'][3]), newLine)
+    # legacy += tab + 'specularPower[0] = "1";' + newLine
+    # legacy += tab + 'translucentBlendOp = "None";' + newLine
+    # legacy += tab + 'vertColor[0] = "1";' + newLine
+    # legacy += tab + 'useAnisotropic[0] = "1";' + newLine
+
+    for param, value in material.items():
+        legacy += tab + '{} = "{}";{}'.format(param, value, newLine)
+
     legacy += '};' + newLine
     legacy += newLine
 
@@ -74,7 +78,7 @@ def readLegacy(path):
         else:
             if("=" in line):
                 array = line.split("=")
-                currentlyReading[array[0].strip()] = array[1].strip()
+                currentlyReading[array[0].strip(' "')] = array[1].strip(' ";\n')
             elif("};" in line):
                 currentlyReading = None
 
@@ -115,7 +119,7 @@ def analyzeLegacy(path):
 
 
 
-def optimiseTexturesLegacy(path):
+def removeTextureDoublesLegacy(path):
 
     materials = readLegacy(path)
     optimisedMaterials = []
@@ -130,11 +134,15 @@ def optimiseTexturesLegacy(path):
                     break
 
         if(duplicate == False):
+            # if('colorMap[0]' in material): material['colorMap'] = material['colorMap[0]']
+            # if('diffuseColor[0]' in material): material['color'] = material['diffuseColor[0]']
             optimisedMaterials.append(material)
 
     output = ''
     for material in optimisedMaterials:
         output += getLegacyFormat(material)
+
+    # print(output)
 
     clipboard.copy(output)
 
@@ -143,6 +151,20 @@ def optimiseTexturesLegacy(path):
     print('Reduced by {}%'.format(str(round((1-(len(optimisedMaterials) / len(materials))) * 100, 2))))
 
 
+def getMapToTexturePairs(path):
+    materials = readLegacy(path)
+
+    pairs = {}
+    for material in materials.values():
+        if('mapTo' in material and 'colorMap[0]' in material):
+            pairs[material['mapTo']] = material['colorMap[0]']
+
+    with open('pairs.json', 'w') as json_file:
+        json.dump(pairs, json_file)
+
+
 # jsonToLegacy("C:\\Users\\blaha\\Desktop\\mats.json")
 # analyzeLegacy("C:\\Users\\blaha\\Desktop\\mat_temp\\materials.cs")
-optimiseTexturesLegacy("C:\\Users\\blaha\\Desktop\\mat_temp\\materials.cs")
+removeTextureDoublesLegacy("C:\\Users\\blaha\\Desktop\\mat_temp\\materials.cs")
+
+# getMapToTexturePairs("C:\\Users\\blaha\\Desktop\\mat_temp\\materials.cs")
