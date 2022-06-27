@@ -1,3 +1,3 @@
-# BeamNG-material-tools
+# BeamNG Pyton Tools
 
-Helper tools for BeamNG materials, both the legacy and the new json format
+Python scripts automating tasks related to map creation in BeamNG
